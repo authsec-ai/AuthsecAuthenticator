@@ -90,6 +90,8 @@ The app uses EAS (Expo Application Services) for builds and push notification de
 
 ### 4. Configure the backend URL
 
+For backend setup and configuration, refer to the [AuthSec CIBA documentation](https://docs.authsec.dev/ciba/).
+
 Update the `BASE_URL` in `src/services/api.ts` to point to your AuthSec backend:
 
 ```typescript
