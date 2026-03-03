@@ -1,6 +1,6 @@
 # AuthSec Authenticator
 
-AuthSec Authenticator is an open source mobile authenticator app built with Expo and React Native. It is the reference mobile client for the [AuthSec](https://authsec.io) identity platform, demonstrating how to integrate the AuthSec SDK to enable CIBA (Client-Initiated Backchannel Authentication) push approval flows alongside TOTP, biometric unlock, and OIDC/SAML login. Use it as a starting point to build your own authenticator app powered by the AuthSec SDK.
+AuthSec Authenticator is an open source mobile authenticator app built with Expo and React Native. It is the reference mobile client for the [AuthSec](https://authsec.ai) identity platform, demonstrating how to integrate the AuthSec SDK to enable CIBA (Client-Initiated Backchannel Authentication) push approval flows alongside TOTP, biometric unlock, and OIDC/SAML login. Use it as a starting point to build your own authenticator app powered by the AuthSec SDK.
 
 [![App Store](https://img.shields.io/badge/App_Store-Download-black?logo=apple)](https://apps.apple.com/us/app/authsec-authenticator/id6758098427)
 [![Play Store](https://img.shields.io/badge/Play_Store-Download-green?logo=google-play)](https://play.google.com/store/apps/details?id=com.authsec.app)
