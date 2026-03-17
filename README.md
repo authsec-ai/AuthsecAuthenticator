@@ -9,6 +9,10 @@ AuthSec Authenticator is an open source mobile authenticator app built with Expo
 - [Apple App Store](https://apps.apple.com/us/app/authsec-authenticator/id6758098427)
 - [Google Play Store](https://play.google.com/store/apps/details?id=com.authsec.app)
 
+## Demo
+
+<video src="ciba.mp4" controls width="100%"></video>
+
 ## Features
 
 - **TOTP Authentication** — Generate time-based one-time passwords via QR code scanning (compatible with Google Authenticator, Authy, etc.)
@@ -20,6 +24,154 @@ AuthSec Authenticator is an open source mobile authenticator app built with Expo
 - **QR Code Scanner** — Scan TOTP secrets via camera
 - **Dark / Light Theme** — Automatic theme based on system preference
 - **Secure Storage** — Tokens and secrets stored in Keychain (iOS) / Keystore (Android)
+
+## CIBA SDK Integration
+
+The AuthSec Authenticator app is the mobile counterpart to the **AuthSec CIBA SDK** — a Python SDK that lets developers add passwordless push-notification authentication to any application. When your app calls the SDK, the user receives a push notification on this mobile app and approves or denies the request.
+
+### Install the SDK
+
+```bash
+pip install authsec-sdk
+```
+
+### Quick Start
+
+```python
+from AuthSec_SDK import CIBAClient
+
+# Initialize with your tenant client ID
+client = CIBAClient(client_id="your_client_id")
+```
+
+### CIBA Push Notification Flow
+
+Send a push notification to the user's AuthSec Authenticator app and wait for approval:
+
+```python
+# Step 1: Send push notification to user's mobile app
+result = client.initiate_app_approval("user@example.com")
+auth_req_id = result["auth_req_id"]
+
+# Step 2: Poll for approval (blocks until user responds or timeout)
+approval = client.poll_for_approval(
+    email="user@example.com",
+    auth_req_id=auth_req_id,
+    interval=5,      # seconds between polls
+    timeout=120       # max wait time in seconds
+)
+
+# Step 3: Handle the result
+if approval["status"] == "approved":
+    token = approval["token"]
+    print("User approved! Token received.")
+elif approval["status"] == "access_denied":
+    print("User denied the request.")
+elif approval["status"] == "timeout":
+    print("Request timed out.")
+```
+
+### TOTP Fallback
+
+If push notification fails or the user prefers a code, use TOTP verification:
+
+```python
+result = client.verify_totp("user@example.com", "123456")
+
+if result["success"]:
+    token = result["token"]
+    print("Code verified!")
+else:
+    print(f"Invalid code. {result['remaining']} attempts remaining.")
+```
+
+### Cancel an Approval
+
+Cancel any in-progress polling and reset TOTP retry counters:
+
+```python
+client.cancel_approval("user@example.com")
+```
+
+### Non-Blocking CIBA with Threading
+
+For applications that need to remain responsive (voice agents, GUIs), run polling in a background thread:
+
+```python
+import threading
+
+def poll_in_background(email, auth_req_id):
+    approval = client.poll_for_approval(email, auth_req_id, timeout=120)
+    if approval["status"] == "approved":
+        print(f"Token: {approval['token']}")
+
+result = client.initiate_app_approval("user@example.com")
+thread = threading.Thread(
+    target=poll_in_background,
+    args=("user@example.com", result["auth_req_id"]),
+    daemon=True
+)
+thread.start()
+# Your app remains responsive while waiting for approval
+```
+
+### Example: Voice Agent with CIBA
+
+Here's how a voice AI assistant can use CIBA to authenticate users before completing a transaction (e.g., booking a flight):
+
+```python
+from AuthSec_SDK import CIBAClient
+
+client = CIBAClient(client_id="your_client_id")
+
+# 1. User interacts freely (search flights, ask questions)
+# 2. When they want to book, trigger CIBA auth:
+result = client.initiate_app_approval("user@example.com")
+print("Check your AuthSec app for a verification request.")
+
+approval = client.poll_for_approval(
+    "user@example.com", result["auth_req_id"], timeout=120
+)
+
+if approval["status"] == "approved":
+    # 3. User approved on phone — complete the booking
+    print("Identity verified. Booking confirmed!")
+else:
+    # 4. Offer TOTP fallback
+    code = input("Enter your 6-digit code: ")
+    totp_result = client.verify_totp("user@example.com", code)
+    if totp_result["success"]:
+        print("Code verified. Booking confirmed!")
+```
+
+### API Reference
+
+| Method | Description |
+|---|---|
+| `initiate_app_approval(email)` | Send push notification, returns `auth_req_id` |
+| `poll_for_approval(email, auth_req_id, interval, timeout)` | Poll for approval (blocking) |
+| `verify_totp(email, code)` | Verify a 6-digit TOTP code |
+| `cancel_approval(email)` | Cancel polling and reset retry counters |
+
+### Configuration Options
+
+```python
+# Tenant flow (recommended for apps)
+client = CIBAClient(client_id="your_client_id")
+
+# Custom backend URL
+client = CIBAClient(
+    client_id="your_client_id",
+    base_url="https://your-api.example.com"
+)
+
+# Admin flow (no client scoping)
+client = CIBAClient()
+```
+
+For full SDK documentation, see the [AuthSec CIBA Documentation](https://docs.authsec.dev/ciba/).
+
+---
 
 ## Prerequisites
 
