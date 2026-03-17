@@ -11,7 +11,7 @@ AuthSec Authenticator is an open source mobile authenticator app built with Expo
 
 ## Demo
 
-<video src="ciba.mp4" controls width="100%"></video>
+<video src="https://github.com/user-attachments/assets/5b4666c2-e705-4549-9286-5e82bfbbbf21" controls width="100%"></video>
 
 ## Features
 
